@@ -19,7 +19,7 @@ const options = {
 
 app.use(cors(options))
 
-const port = process.env.PORT || 3000,
+const port = process.env.PORT || 3000
 
 
 

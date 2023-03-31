@@ -19,13 +19,13 @@ const options = {
 
 app.use(cors(options))
 
-const port = 3000
+const port = process.env.PORT || 3000,
 
 
 
 app.use(express.json())
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
 	res.send("Hello!")
 })
 

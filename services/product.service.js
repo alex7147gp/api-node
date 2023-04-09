@@ -1,80 +1,74 @@
-const { faker } = require("@faker-js/faker")
 const boom = require("@hapi/boom")
+const ProductModel = require("../models/product.model");
+
+const CategoryModel = require("../models/category.model");
+
+
 
 class ProductService {
 
-
-   constructor() {
-   	 this.products = [];
-     this.generate();
-   }
-
-   generate() {
-   	  const limit = 10
-
-      for (let index = 0; index < limit; index++) {
-        this.products.push({
-        	id: faker.datatype.uuid(),
-  	      name: faker.commerce.productName(),
-  	      describe: faker.commerce.productDescription(),
-  	      price: faker.commerce.price(100),
-  	      categorie: faker.commerce.department(),
-          isBlok: faker.datatype.boolean()
-        })
-      }  
-   }
-
-
 	async create(data) {
-		this.al()
-    const newProduct = {
-    	id: faker.datatype.uuid(),
-    	...data
+    const product = new ProductModel(data);
+    try {
+    	const newProduct = await product.save();
+    	const category = await CategoryModel.findById(product.category);
+    	category.products = [...category.products, newProduct._id];
+    	await category.save()
+
+    	return {
+    		newProduct,
+    		category,
+    	}
     }
-    this.products.push(newProduct);
-    return newProduct;
+
+    catch (err) {
+    	throw boom.conflict(err)
+    }
 	}
 
-	async find() {
-		  return new Promise((resolve, reject) => {
-		  	setTimeout(() => {
-		  		resolve(this.products);
-		  	}, 5000)
-		  })
+	async find(query) {
+		  const { limit, offset } = query;
+		  if (limit && offset) {
+		  	return await ProductModel.find()
+		  	  .skip(parseInt(offset))
+		  	  .limi(parseInt(limit))
+		  }
+
+		  return await ProductModel.find();
 	}
 
 	async findOne(id) {
-    const product = this.products.find(item => item.id === id)
+    const product = await ProductModel.find(id).populate("category");
     if (!product) {
     	throw boom.notFound("product not found")
-    }
-    if (product.isBlok) {
-    	throw boom.conflict("product is blok") 
     }
     return product
 	}
 
 	async update(id, changes) {
-      const index = this.products.findIndex(item => item.id === id)
-	    if (index === -1) {
+      const product = await ProductModel.findIdAndUpdate(id, changes, {
+      	new: true,
+      })
+	    if (product) {
 	    	throw boom.notFound("product not found")
 	    }
-	    const product = this.products[index];
-	    this.products[index] = {
-	    	...product,
-	    	...changes
-	    }
-	    return this.products[index];
+	    return product;
 	}
 
 	async delete(id) {
-      const index = this.products.findIndex(item => item.id === id)
-      if (index === -1) {
-	    	throw boom.notFound("product not found")
-	    }
-	    this.products.splice(index, 1);
-	    return { id };
-	}
+		  try {
+		  	const product = await ProductModel.findByIdAndDelete(id)
+		  	if(!product) {
+		  		throw boom.notFound("product not found");
+		  	}
+		  	const category = await CategoryModel.findById(product.category);
+		  	category.products.filter((item) => JSON.stringFy(item) !== id);
+		  	return { product, category };
+		  }
+		  catch (err) {
+        throw boom.conflict(err)
+		  }
+	}	  
 }
 
 module.exports = ProductService;

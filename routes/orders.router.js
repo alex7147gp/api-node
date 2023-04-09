@@ -1,29 +1,19 @@
-const express = require("express")
-const UserService = require("../services/user.service");
+const express = require("express");
+const OrderService = require("../services/order.service");
 
-const validatorHandler = require("../middleware/validate.handler")
-const router = express.Router()
+const validatorHandler = require("../middleware/validate.handler");
+const {
+  getOrderSchema,
+  createOrderSchema,
+  updateOrderSchema,
+} = require("../schema/order.schema");
 
-const { getUserSchema,
- createUserSchema, 
- updateUserSchema } = require("../schema/user.schema");
-
-const service = new UserService;
-
-router.get("/", 
-	async (req, res, next) => {
-      try {
-      	const users = await servise.find();
-      	res.status(200).json(users);
-      }
-      catch (err) {
-      	next(err)
-      }	
-})
+const router = express.Router();
+const service = new OrderService();
 
 router.post(
   "/",
-  validatorHandler(createUserSchema, "body"),
+  validatorHandler(createOrderSchema, "body"),
   async (req, res, next) => {
     try {
       const { body } = req;
@@ -35,9 +25,18 @@ router.post(
   }
 );
 
+router.get("/", async (req, res, next) => {
+  try {
+    const users = await service.find();
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getOrderSchema, "params"),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -51,8 +50,8 @@ router.get(
 
 router.patch(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
-  validatorHandler(updateUserSchema, "body"),
+  validatorHandler(getOrderSchema, "params"),
+  validatorHandler(updateOrderSchema, "body"),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -67,7 +66,7 @@ router.patch(
 
 router.delete(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getOrderSchema, "params"),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -78,5 +77,4 @@ router.delete(
     }
   }
 );
-
-module.exports = router
+module.exports = router;

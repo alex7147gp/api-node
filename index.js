@@ -1,33 +1,30 @@
-console.log("Hello!")
-
-
 const express = require("express")
 const routerApi = require("./routes")
 
 const cors = require("cors")
+const config = require("./config/config");
 
 const { logErrors, errorHandler, boomErrorHandler } = require("./middleware/error.handler.js")
-
-
+const { checkApiKey } = require("./middleware/auth.handler")
+const connectDb = require("./libs/mongoose");
 const app = express()
+const corsApi = require("./utils/cors");
 
+app.use(cors());
 
+const port = config.port
 
-const options = {
-  origin: ["http://localhost:3000", "https://myapp.co"]
-};
-
-app.use(cors(options))
-
-const port = process.env.PORT || 3000
-
-
+connectDb(config.mongoDbUri);
 
 app.use(express.json())
 
 app.get("/", (req, res) => {
 	res.send("Hello!")
 })
+
+app.get("/nueva-ruta", checkApiKey, (req, res) => {
+	res.send("Helo i am a new way")
+} )
 
 routerApi(app)
 

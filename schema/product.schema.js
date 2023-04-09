@@ -2,27 +2,31 @@ const Joi = require("joi");
 
 
 
-const id = Joi.string().uuid();
+const id = Joi.string().regex(/^[0-9a-fA-F]{24}$/);
 const name = Joi.string();
-const describe = Joi.string();
-const price = Joi.number().integer().min(10);
-const categorie = Joi.string();
-const image = Joi.string();
+const description = Joi.string();
+const price = Joi.number().integer();
+const category = Joi.string();
+const image = Joi.string().uri();
+const url = Joi.string().uri();
+
 
 const createProductSchema = Joi.object({
 	name: name.required(),
-	describe: describe.required(),
+	description: description.required(),
 	price: price.required(),
-	categorie: categorie.required(),
+	category: id,
 	image: image.required(),
+	url: url.required()
 })
 
 const updateProductSchema = Joi.object({
 	name: name,
-	describe: describe,
+	description: description,
 	price: price,
-	categorie: categorie,
+	category: id,
 	image: image,
+	url: url
 })
 
 const getProductSchema = Joi.object({

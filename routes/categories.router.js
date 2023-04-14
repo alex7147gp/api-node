@@ -7,9 +7,12 @@ const validatorHandler = require("../middleware/validate.handler")
 const { getCategorySchema,
   createCategorySchema,
   updateCategorySchema } = require("../schema/category.schema")
-
+const passport = require("passport");
 
 const service = new CategoryService()
+
+const { checkAdminRole, checkRoles } = require("../middleware/auth.handler")
+
 
 router.get("/", async (req, res, next) => {
   try {
@@ -23,6 +26,8 @@ router.get("/", async (req, res, next) => {
 
 router.post(
   "/",
+  //passport.authenticate('jwt', { session: false }),
+  //checkRoles('admin', 'customer'),
   validatorHandler(createCategorySchema, "body"),
   async (req, res, next) => {
     try {

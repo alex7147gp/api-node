@@ -1,17 +1,21 @@
 const CustomerModel = require("../models/customer.model");
 const UserModel = require("../models/user.model");
 const boom = require("@hapi/boom");
+const bcrypt = require("bcrypt");
+
 
 class CustomerService {
   async create(data) {
     const { user } = data;
+    const hash = await bcrypt.hash(user.password, 10);
     const newUser = new UserModel({
-      ...user,
+      ...user, password: hash,
       role: "customer",
     });
     let userRes;
     try {
       userRes = await newUser.save();
+      delete userRes._doc.password
     } catch (error) {
       throw boom.conflict(error);
     }

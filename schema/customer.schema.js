@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const id = Joi.string().regex(/^[0-9a-fA-F]{24}$/);
 const name = Joi.string().min(4);
-const phone = Joi.string();
+const phone = Joi.number().integer();
 const orders = Joi.array();
 const user = Joi.object({
   email: Joi.string().email(),

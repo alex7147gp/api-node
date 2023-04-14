@@ -13,7 +13,7 @@ const service = new UserService;
 router.get("/", 
 	async (req, res, next) => {
       try {
-      	const users = await servise.find();
+      	const users = await service.find();
       	res.status(200).json(users);
       }
       catch (err) {

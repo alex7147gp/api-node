@@ -25,17 +25,32 @@ class OrderService {
     }
   }
   async find() {
-    return await OrderModel.find();
+    const orders = await OrderModel.find();
+    return orders;
   }
   async findOne(id) {
     const order = await OrderModel.findById(id)
       .populate("products")
       .populate("customer")
       .exec();
+
     if (!order) {
       throw boom.notFound("order not found");
     }
     return order;
+  }
+  async findByUser(userId) {
+    const order = await OrderModel.find().populate("customer");
+    const orders = order.filter((item) => {
+      return item.customer.user.equals(userId);
+    }).map((item) => {
+      return item;
+    }) 
+    console.log(orders);
+    if (!order) {
+      throw boom.notFound("order not found");
+    }
+    return orders;
   }
   async update(id, changes) {
     const order = await OrderModel.findByIdAndUpdate(id, changes, {

@@ -1,11 +1,17 @@
 const UserModel = require("../models/user.model");
 const boom = require("@hapi/boom");
 
+const bcrypt = require("bcrypt");
+
+
+
 class UserService {
   async create(data) {
-    const newUser = new UserModel(data);
+    const hash = await bcrypt.hash(data.password, 10);
+    const newUser = new UserModel({ ...data, password: hash});
     try {
       const dbRes = await newUser.save();
+      delete dbRes._doc.password;
       return dbRes;
     } catch (error) {
       throw boom.conflict(error);

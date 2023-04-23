@@ -12,7 +12,7 @@ const corsApi = require("./utils/cors");
 
 app.use(cors());
 
-const port = config.port
+const port = config.port || 3000
 
 connectDb(config.mongoDbUri);
 
